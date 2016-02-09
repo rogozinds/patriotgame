@@ -2,8 +2,8 @@ var Game = function() {
     // Set the width and height of the scene.
    // this._width = document.body.clientWidth;
    // this._height = document.body.clientHeight;
-    this._width = 1024;
-    this._height = 768;
+    this._width = 1920;
+    this._height = 1440;
     this.count=0;
     this.lives=0;
     this._center = {
@@ -140,7 +140,8 @@ Game.prototype = {
     endGame: function () {
     },
     throwHeads: function () {
-        var rand = Math.ceil(1000 + (Math.random() * 4) * 1000);
+        //var rand = Math.ceil(1000 + (Math.random() * 4) * 1000);
+        var rand =2000;
         this.timer = setTimeout(function () {
             var texture = new PIXI.Texture.fromImage('assets/2.png');
 // create a texture from an image path
@@ -154,14 +155,14 @@ Game.prototype = {
             head.interactive = true;
             head.buttonMode = true;
             head.alpha = 0.2;
-            head.click = this.onHit.bind(this);
-            head.tap = this.onHit.bind(this);
+            head.click = this.onHit.bind(this,head);
+            head.tap = this.onHit.bind(this, head);
             // Tween the rock with an easing function to simulate physics.
             var y1 = Math.round(50 + Math.random() * 500);
             head._tween1 = createjs.Tween.get(head)
-                .to({alpha:1,y: y1}, 5000,createjs.Ease.cubicOut)
-                .call(function(stone) {
-                    this.stage.removeChild(stone);
+                .to({alpha:1,y: y1}, 3000,createjs.Ease.cubicOut)
+                .call(function(item) {
+                    this.stage.removeChild(item);
                 }.bind(this,head));
 
             this.stage.addChild(head);
@@ -179,7 +180,38 @@ Game.prototype = {
         requestAnimationFrame(this.tick.bind(this));
     }
     ,
-    onHit: function () {
+    onHit: function (item) {
+        //remove
+        createjs.Tween.removeTweens(item);
+        this.stage.removeChild(item);
+        //explode
+        // Create several smaller rocks.
+        // Setup the rock sprite.
+        var piece = new PIXI.Sprite.fromImage("assets/blood1.png");
+         piece.width = Math.round(piece.texture.width * 0.33);
+         piece.height = Math.round(piece.texture.height * 0.33);
+         piece.anchor.x = 0.0;
+            piece.anchor.y = 0.0;
+            piece.position.x = item.position.x;
+            piece.position.y = item.position.y;
+
+            // Tween the rock.
+            var x = item.position.x + 30;
+            var y = item.position.y - 60;
+            var x1 = x+ 30;
+            var y1= y - 10;
+            var t = 800 + Math.round(Math.random() * 100);
+            var tween = createjs.Tween.get(piece)
+                .to({x:x, y:y, rotation:1, alpha:0.5}, t,createjs.Ease.cubicOut)
+                .to({x:x1, y:y1, alpha:0.5}, t,createjs.Ease.cubicOut)
+                .call(function(obj) {
+                    this.stage.removeChild(obj);
+                }.bind(this, piece));
+
+            // Add the rock to the stage.
+            this.stage.addChild(piece);
+
+
         this.count += 1;
         // update the text with a new string
         this.countingText.text = "Score:" + this.count;
