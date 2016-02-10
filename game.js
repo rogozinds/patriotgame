@@ -5,7 +5,7 @@ var Game = function() {
     this._width = 1920;
     this._height = 1440;
     this.count=0;
-    this.lives=0;
+    this.lives=3;
     this._center = {
         x: Math.round(this._width / 2),
         y: Math.round(this._height / 2)
@@ -123,7 +123,7 @@ Game.prototype = {
         this.stage.addChild(this.countingText)
 
         // create a text object that will be updated...
-        var livesText = new PIXI.Text('Lives: 0', {
+        this.livesText = new PIXI.Text('Lives: '+this.lives, {
             font: 'bold italic 14px',
             fill: '#3e1707',
             align: 'center',
@@ -131,13 +131,17 @@ Game.prototype = {
             strokeThickness: 7
         });
 
-        livesText.position.x = 50;
-        livesText.position.y = 100;
-        livesText.anchor.x = 0.1;
-        this.stage.addChild(livesText)
+        this.livesText.position.x = 50;
+        this.livesText.position.y = 100;
+        this.livesText.anchor.x = 0.1;
+        this.stage.addChild(this.livesText)
 
     },
     endGame: function () {
+        clearTimeout(this.timer);
+        this.stage.removeChild(this.countingText);
+        this.stage.removeChild(this.livesText);
+        this.setupMenu();
     },
     throwHeads: function () {
         //var rand = Math.ceil(1000 + (Math.random() * 4) * 1000);
@@ -150,7 +154,7 @@ Game.prototype = {
             head.anchor.x = 0.5;
             head.anchor.y = 0.5;
             // move the sprite t the center of the screen
-            head.position.x = 200;
+            head.position.x = Math.round(Math.random() * this._width);
             head.position.y = 150;
             head.interactive = true;
             head.buttonMode = true;
@@ -163,6 +167,14 @@ Game.prototype = {
                 .to({alpha:1,y: y1}, 3000,createjs.Ease.cubicOut)
                 .call(function(item) {
                     this.stage.removeChild(item);
+                    this.lives -= 1;
+                    // update the text with a new string
+                    this.livesText.text = "LIVES:" + this.lives;
+                    this.livesText.updateText();
+                    // End game if out of lives.
+                    if (this.lives <= 0) {
+                        this.endGame();
+                    }
                 }.bind(this,head));
 
             this.stage.addChild(head);
@@ -181,46 +193,56 @@ Game.prototype = {
     }
     ,
     onHit: function (item) {
-        //remove
-        createjs.Tween.removeTweens(item);
-        this.stage.removeChild(item);
         //explode
         // Create several smaller rocks.
         // Setup the rock sprite.
-        var piece = new PIXI.Sprite.fromImage("assets/blood1.png");
-         piece.width = Math.round(piece.texture.width * 0.33);
-         piece.height = Math.round(piece.texture.height * 0.33);
-         piece.anchor.x = 0.0;
-            piece.anchor.y = 0.0;
-            piece.position.x = item.position.x;
-            piece.position.y = item.position.y;
+        createjs.Tween.get(item).to({alpha:0.3}, 200,createjs.Ease.cubicOut);
+        for (var i=0; i<3;i++) {
+            for(var j=0;j<2;j++) {
+                var piece = new PIXI.Sprite.fromImage("assets/blood1.png");
+                piece.width = Math.round(piece.texture.width * 0.43);
+                piece.height = Math.round(piece.texture.height * 0.43);
+                piece.anchor.x = 0.5;
+                piece.anchor.y = 0.5;
+                piece.position.x = item.position.x;
+                piece.position.y = item.position.y;
 
-            // Tween the rock.
-            var x = item.position.x + 30;
-            var y = item.position.y - 60;
-            var x1 = x+ 30;
-            var y1= y - 10;
-            var t = 800 + Math.round(Math.random() * 100);
-            var tween = createjs.Tween.get(piece)
-                .to({x:x, y:y, rotation:1, alpha:0.5}, t,createjs.Ease.cubicOut)
-                .to({x:x1, y:y1, alpha:0.5}, t,createjs.Ease.cubicOut)
-                .call(function(obj) {
-                    this.stage.removeChild(obj);
-                }.bind(this, piece));
+                // Tween the rock.
+                var side=1;
+                if(j!=0) {
+                    side =-1;
+                }
+                var x = item.position.x + 30 * side;
+                var y = item.position.y - 30 * i;
+                var t = 800 + Math.round(Math.random() * 100);
 
-            // Add the rock to the stage.
-            this.stage.addChild(piece);
+                var tween = createjs.Tween.get(piece)
+                    .to({x: x, y: y, rotation: 1, alpha: 0.5}, t, createjs.Ease.cubicOut)
+                    .call(function (obj) {
+                        this.stage.removeChild(obj);
+                    }.bind(this, piece));
+                this.stage.addChild(piece);
 
-
+            }
+        }
+        //remove
+        createjs.Tween.removeTweens(item);
+        this.stage.removeChild(item);
+        // Add the rock to the stage.
+        this.stage.addChild(piece);
         this.count += 1;
         // update the text with a new string
-        this.countingText.text = "Score:" + this.count;
+        this.countingText.text = "SCORE:" + this.count;
         this.countingText.updateText();
     },
     onHitWrong: function () {
         this.lives -= 1;
         // update the text with a new string
-        this.livesText.text = "Lives:" + this.lives;
+        this.livesText.text = "LIVES:" + this.lives;
         this.livesText.updateText();
+        // End game if out of lives.
+        if (this.lives <= 0) {
+            this.endGame();
+        }
     }
 };
