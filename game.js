@@ -17,7 +17,8 @@ var Game = function() {
 
     // Create the main stage to draw on.
     this.stage = new PIXI.Stage();
-
+    // Store rocks.
+    this.heads = [];
     // Start running the game.
     this.build();
 };
@@ -139,6 +140,16 @@ Game.prototype = {
     },
     endGame: function () {
         clearTimeout(this.timer);
+        // Clear the stage.
+        for (var i=0; i<this.heads.length; i++) {
+            if (this.heads[i]) {
+                createjs.Tween.removeTweens(this.heads[i]);
+                this.stage.removeChild(this.heads[i]);
+            }
+        }
+        this.rocks = [];
+        this.count=0;
+        this.lives=3;
         this.stage.removeChild(this.countingText);
         this.stage.removeChild(this.livesText);
         this.setupMenu();
@@ -176,7 +187,7 @@ Game.prototype = {
                         this.endGame();
                     }
                 }.bind(this,head));
-
+            this.heads.push(head);
             this.stage.addChild(head);
             this.throwHeads();
         }.bind(this), rand);
