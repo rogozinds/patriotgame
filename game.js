@@ -169,7 +169,7 @@ Game.prototype = {
             head.position.y = 150;
             head.interactive = true;
             head.buttonMode = true;
-            head.alpha = 0.2;
+            head.alpha = 0.5;
             head.click = this.onHit.bind(this,head);
             head.tap = this.onHit.bind(this, head);
             // Tween the rock with an easing function to simulate physics.
@@ -228,7 +228,7 @@ Game.prototype = {
                 var t = 800 + Math.round(Math.random() * 100);
 
                 var tween = createjs.Tween.get(piece)
-                    .to({x: x, y: y, rotation: 1, alpha: 0.5}, t, createjs.Ease.cubicOut)
+                    .to({x: x, y: y, rotation: 1, alpha: 0.9}, t, createjs.Ease.quadOut )
                     .call(function (obj) {
                         this.stage.removeChild(obj);
                     }.bind(this, piece));
