@@ -33,6 +33,12 @@ Game.prototype = {
 
         // Setup the start screen.
         this.setupMenu();
+        this.sound = new Howl({
+            src: ['shot.wav'],
+            sprite: {
+                shot: [0, 1000]
+            }
+        });
 
         // Begin the first frame.
         requestAnimationFrame(this.tick.bind(this));
@@ -207,6 +213,7 @@ Game.prototype = {
         //explode
         // Create several smaller rocks.
         // Setup the rock sprite.
+        this.sound.play('shot');
         createjs.Tween.get(item).to({alpha:0.3}, 200,createjs.Ease.cubicOut);
         for (var i=0; i<3;i++) {
             for(var j=0;j<2;j++) {
