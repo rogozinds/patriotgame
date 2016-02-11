@@ -4,8 +4,7 @@ var Game = function() {
    // this._height = document.body.clientHeight;
     this._width = 1920;
     this._height = 1440;
-    this.count=0;
-    this.lives=3;
+    this._streakLimit=2;
     this._center = {
         x: Math.round(this._width / 2),
         y: Math.round(this._height / 2)
@@ -27,6 +26,13 @@ Game.prototype = {
     /**
      * Build the scene and begin animating.
      */
+
+    defaultValues: function() {
+        this.rocks = [];
+        this._streak = 0;
+        this.count=0;
+        this.lives=3;
+    },
     build: function () {
         // Draw the background.
         this.setupBg();
@@ -56,7 +62,6 @@ Game.prototype = {
         bg.anchor.y = 0.5;
         bg.position.x = this._center.x;
         bg.position.y = this._center.y;
-
         // Mount onto the stage.
         this.stage.addChild(bg);
     },
@@ -65,7 +70,7 @@ Game.prototype = {
      */
     setupMenu: function () {
         // Create game name display.
-        var name = new PIXI.Text('Stone Samurai', {
+        var name = new PIXI.Text('True Patriot', {
             font: 'bold 100px Arial',
             fill: '#7da6de',
             stroke: 'black',
@@ -101,7 +106,6 @@ Game.prototype = {
         button.interactive = true;
         button.buttonMode = true;
         button.click = function () {
-            document.body.style.cursor = 'default';
             this.stage.removeChild(button);
             this.stage.removeChild(name);
             this.startGame();
@@ -112,12 +116,13 @@ Game.prototype = {
      * Start the gameplay.
      */
     startGame: function () {
+        this.defaultValues();
         // Setup timer to throw random rocks.
         this.throwHeads();
 
 // create a text object that will be updated...
         this.countingText = new PIXI.Text('SCORE: 0', {
-            font: 'bold italic 14px',
+            font: 'bold 50px Arial',
             fill: '#3e1707',
             align: 'center',
             stroke: '#a4410e',
@@ -131,10 +136,10 @@ Game.prototype = {
 
         // create a text object that will be updated...
         this.livesText = new PIXI.Text('Lives: '+this.lives, {
-            font: 'bold italic 14px',
+            font: 'bold 50px Arial',
             fill: '#3e1707',
             align: 'center',
-            stroke: '#a4410e',
+            stroke: '#FF0000',
             strokeThickness: 7
         });
 
@@ -145,6 +150,7 @@ Game.prototype = {
 
     },
     endGame: function () {
+        this.defaultValues();
         clearTimeout(this.timer);
         // Clear the stage.
         for (var i=0; i<this.heads.length; i++) {
@@ -153,9 +159,6 @@ Game.prototype = {
                 this.stage.removeChild(this.heads[i]);
             }
         }
-        this.rocks = [];
-        this.count=0;
-        this.lives=3;
         this.stage.removeChild(this.countingText);
         this.stage.removeChild(this.livesText);
         this.setupMenu();
@@ -175,6 +178,7 @@ Game.prototype = {
             head.position.y = 150;
             head.interactive = true;
             head.buttonMode = true;
+            head.defaultCursor = "crosshair";
             head.alpha = 0.5;
             head.click = this.onHit.bind(this,head);
             head.tap = this.onHit.bind(this, head);
@@ -209,10 +213,71 @@ Game.prototype = {
         requestAnimationFrame(this.tick.bind(this));
     }
     ,
+    animateStreak: function() {
+
+        var assetsToLoad = ["assets/gund1.png"];
+        // create a new loader
+        this.loader = new PIXI.AssetLoader(assetsToLoad);
+        // use callback
+        this.loader.onComplete = onAssetsLoaded.bind(this);
+        //begin load
+        this.loader.load();
+
+        function onAssetsLoaded() {
+
+            var texture = PIXI.Texture.fromImage("assets/gund1.png");
+            var streakPiece = new PIXI.Sprite(texture);
+            // this will log the correct width and height as the image was preloaded into the pixi.js cache
+            console.log(streakPiece.width + ', ' + streakPiece.height);
+            streakPiece.texture.baseTexture.on('loaded', function(){    console.log(streakPiece.width, streakPiece.height);});
+            streakPiece.anchor.x =0.0;
+            streakPiece.anchor.y =0.0;
+            streakPiece.position.x=this._width-streakPiece.width/2;
+            streakPiece.position.y=-streakPiece.height/2;
+            streakPiece.alpha=0.3;
+            var x=this._width-streakPiece.width;
+            var y = 0;
+            createjs.Tween.get(streakPiece)
+                .to({x:x,y:y,alpha:0.8}, 1500,createjs.Ease.quadOut)
+                .call(function(streakPiece) {
+                    this.stage.removeChild(streakPiece);
+                }.bind(this,streakPiece));
+
+            rampage = new PIXI.Text('RAMPAGE!!!', {
+                font: 'bold 100px Arial',
+                fill: '#ff0000',
+                align: 'center',
+                stroke: 'black',
+                strokeThickness: 2
+            });
+            rampage.anchor.x=0.5;
+            rampage.anchor.y=0.5;
+            rampage.position.x = this._width/2;
+            rampage.position.y= 150;
+            rampage.alpha=0.2;
+            createjs.Tween.get(streakPiece)
+                .to({alpha:1}, 1000,createjs.Ease.quadOut)
+                .to({alpha:1}, 1000,createjs.Ease.quadOut)
+                .call(function(rampage) {
+                    this.stage.removeChild(rampage);
+                }.bind(this,rampage));
+            this.stage.addChild(rampage)
+            this.stage.addChild(streakPiece);
+        }
+
+
+
+
+
+    },
     onHit: function (item) {
         //explode
         // Create several smaller rocks.
         // Setup the rock sprite.
+        if(this._streakLimit==this._streak) {
+            this._streak=0;
+         this.animateStreak();
+        }
         this.sound.play('shot');
         createjs.Tween.get(item).to({alpha:0.3}, 200,createjs.Ease.cubicOut);
         for (var i=0; i<3;i++) {
@@ -242,6 +307,11 @@ Game.prototype = {
                 this.stage.addChild(piece);
 
             }
+        }
+        this._streak+=1;
+        if(this._streak==this._streakLimit) {
+            this.streak=0;
+            console.log("STREAK!");
         }
         //remove
         createjs.Tween.removeTweens(item);
