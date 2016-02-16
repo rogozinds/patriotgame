@@ -39,7 +39,7 @@ Game.prototype = {
         // Setup the start screen.
         this.setupMenu();
         this.sound = new Howl({
-            src: ['shot.wav', 'error.wav'],
+            urls: ['sounds/shot.wav', 'error.wav'],
             sprite: {
                 shot: [0, 1000]
             }
