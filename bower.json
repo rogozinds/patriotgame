@@ -15,5 +15,9 @@
     "bower_components",
     "test",
     "tests"
-  ]
+  ],
+  "dependencies": {
+    "tween.js": "tweenjs#~16.3.4",
+    "howler.js": "howler#~1.1.29"
+  }
 }

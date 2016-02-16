@@ -111,7 +111,7 @@ Game.prototype = {
         }.bind(this);
     },
     nop: function (item) {
-        console.log("Don't shoot at me");
+        this.stage.removeChild(item);
     },
     getImagePath: function (isEnemy, nImages) {
         var rand = Math.floor((Math.random() * nImages) + 1);
@@ -170,7 +170,6 @@ Game.prototype = {
         this.setupMenu();
     },
     headCollapse: function (item) {
-        this.stage.removeChild(item);
         this.lives -= 1;
         // update the text with a new string
         this.livesText.text = "LIVES:" + this.lives;
@@ -220,43 +219,45 @@ Game.prototype = {
         this.renderer.render(this.stage);
         // Begin the next frame.
         requestAnimationFrame(this.tick.bind(this));
-    }
-    ,
+    },
+    onAssetsLoaded: function() {
+        console.log('ramagpafpaa');
+        //   // var texture = PIXI.Texture.fromImage("assets/gund1.png");
+        var streakPiece = new PIXI.Sprite(this.resources.gund.texture);
+        // this will log the correct width and height as the image was preloaded into the pixi.js cache
+        console.log(streakPiece.width + ', ' + streakPiece.height);
+        streakPiece.texture.baseTexture.on('loaded', function () {
+            console.log(streakPiece.width, streakPiece.height);
+        });
+        streakPiece.anchor.x = 0.0;
+        streakPiece.anchor.y = 0.0;
+        streakPiece.position.x = this.game._width - streakPiece.width / 2;
+        streakPiece.position.y = -streakPiece.height / 2;
+        streakPiece.alpha = 0.3;
+        var x = this.game._width - streakPiece.width;
+        var y = 0;
+        createjs.Tween.get(streakPiece)
+            .to({x: x, y: y, alpha: 0.8}, 1500, createjs.Ease.quadOut)
+        .call(function (streakPiece) {
+            this.stage.removeChild(streakPiece);
+        }.bind(this.game, streakPiece));
+
+        this.game.animateMsg('RAMPAGE!!!');
+        this.game.stage.addChild(streakPiece);
+    },
     animateStreak: function () {
-
-        var assetsToLoad = ["assets/gund1.png"];
+        var sprites={};
         // create a new loader
-        this.loader = new PIXI.AssetLoader(assetsToLoad);
+        this.loader = new PIXI.loaders.Loader();
+        this.loader.game=this;
         // use callback
-        this.loader.onComplete = onAssetsLoaded.bind(this);
+        this.loader.add('gund',"assets/gund1.png");
+        this.loader.on('complete',this.onAssetsLoaded);
         //begin load
-        this.loader.load();
+        this.loader.load(function(loader,resources){
+            sprites.gund = new PIXI.Sprite(resources.gund.texture);
+        });
 
-        function onAssetsLoaded() {
-
-            var texture = PIXI.Texture.fromImage("assets/gund1.png");
-            var streakPiece = new PIXI.Sprite(texture);
-            // this will log the correct width and height as the image was preloaded into the pixi.js cache
-            console.log(streakPiece.width + ', ' + streakPiece.height);
-            streakPiece.texture.baseTexture.on('loaded', function () {
-                console.log(streakPiece.width, streakPiece.height);
-            });
-            streakPiece.anchor.x = 0.0;
-            streakPiece.anchor.y = 0.0;
-            streakPiece.position.x = this._width - streakPiece.width / 2;
-            streakPiece.position.y = -streakPiece.height / 2;
-            streakPiece.alpha = 0.3;
-            var x = this._width - streakPiece.width;
-            var y = 0;
-            createjs.Tween.get(streakPiece)
-                .to({x: x, y: y, alpha: 0.8}, 1500, createjs.Ease.quadOut)
-                .call(function (streakPiece) {
-                    this.stage.removeChild(streakPiece);
-                }.bind(this, streakPiece));
-
-            this.animateMsg('RAMPAGE!!!');
-            this.stage.addChild(streakPiece);
-        }
     },
     animateMsg: function (text) {
         rampage = new PIXI.Text(text, {
