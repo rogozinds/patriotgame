@@ -34,11 +34,11 @@ Game.prototype = {
         this.lives = 3;
     },
     build: function () {
+        this.background = new Background(this);
         // Draw the background.
-        this.setupBg();
-
+        this.background.setupBg();
         // Setup the start screen.
-        this.setupMenu();
+        this.background.setupMenu();
         this.sound = new Howl({
             urls: ['sounds/shot.wav', 'error.wav'],
             sprite: {
@@ -49,67 +49,7 @@ Game.prototype = {
         // Begin the first frame.
         requestAnimationFrame(this.tick.bind(this));
     },
-    /**
-     * Setup the background image.
-     */
-    setupBg: function () {
-        // return;
-        // Create the texture.
-        var bg = new PIXI.Sprite.fromImage('assets/bg.jpg');
 
-        // Position the background in the center;
-        bg.anchor.x = 0.5;
-        bg.anchor.y = 0.5;
-        bg.position.x = this._center.x;
-        bg.position.y = this._center.y;
-        // Mount onto the stage.
-        this.stage.addChild(bg);
-    },
-    /**
-     * Build the main menu screen.
-     */
-    setupMenu: function () {
-        // Create game name display.
-        var name = new PIXI.Text('True Patriot', {
-            font: 'bold 100px Arial',
-            fill: '#7da6de',
-            stroke: 'black',
-            strokeThickness: 8
-        });
-        name.anchor.x = 0.5;
-        name.anchor.y = 0.5;
-        name.position.x = this._center.x;
-        name.position.y = 100;
-
-        // Create the button graphic.
-        var button = new PIXI.Graphics();
-        button.lineStyle(10, 0x000000);
-        button.beginFill(0xFFD800);
-        button.drawCircle(this._center.x, this._center.y, 150);
-        button.endFill();
-
-        // Create the play icon.
-        var icon = new PIXI.Graphics();
-        icon.beginFill(0x000000);
-        icon.moveTo(this._center.x + 100, this._center.y);
-        icon.lineTo(this._center.x - 60, this._center.y - 80);
-        icon.lineTo(this._center.x - 60, this._center.y + 80);
-        icon.endFill();
-
-        // Add the button to the stage.
-        button.addChild(icon);
-        this.stage.addChild(button);
-        this.stage.addChild(name);
-
-        // Turn this into a button.
-        button.interactive = true;
-        button.buttonMode = true;
-        button.click = function () {
-            this.stage.removeChild(button);
-            this.stage.removeChild(name);
-            this.startGame();
-        }.bind(this);
-    },
     nop: function (item) {
         this.stage.removeChild(item);
     },
@@ -165,29 +105,15 @@ Game.prototype = {
         this.stage.addChild(this.livesText)
 
     },
-    endGame: function () {
-        console.log("game ended");
-        clearTimeout(this.timer);
-        // Clear the stage.
-        for (var i = 0; i < this.heads.length; i++) {
-            if (this.heads[i]) {
-                createjs.Tween.removeTweens(this.heads[i]);
-                this.stage.removeChild(this.heads[i]);
-            }
-        }
-        this.defaultValues();
-        this.stage.removeChild(this.countingText);
-        this.stage.removeChild(this.livesText);
-        this.setupMenu();
-    },
     headCollapse: function (item) {
         this.lives -= 1;
         // update the text with a new string
         this.livesText.text = "LIVES:" + this.lives;
         this.livesText.updateText();
+        this.stage.removeChild(item);
         // End game if out of lives.
         if (this.lives <= 0) {
-            this.endGame();
+            this.background.endGame();
         }
     },
 
@@ -352,7 +278,7 @@ Game.prototype = {
         this.livesText.updateText();
         // End game if out of lives.
         if (this.lives <= 0) {
-            this.endGame();
+            this.background.endGame();
         }
     }
 };
