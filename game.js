@@ -150,12 +150,7 @@ Game.prototype = {
     },
 
     tick: function (time) {
-        // Update tweens.
-        //createjs.Tween.update
-        // TWEEN.update(time);
-        // Render the stage for the current frame.
         this.renderer.render(this.stage);
-        // Begin the next frame.
         requestAnimationFrame(this.tick.bind(this));
     },
     onAssetsLoaded: function() {

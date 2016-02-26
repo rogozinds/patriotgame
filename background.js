@@ -41,11 +41,14 @@ Background.prototype = {
         // Turn this into a button.
         button.interactive = true;
         button.buttonMode = true;
-        button.click = function () {
-            game.stage.removeChild(button);
-            game.stage.removeChild(name);
-            game.startGame();
-        }.bind(game);
+
+        button.click = this.onHitStart.bind(game,button,name);
+        button.tap = this.onHitStart.bind(game,button,name);
+    },
+    onHitStart:function(button,name){
+        this.stage.removeChild(button);
+        this.stage.removeChild(name);
+        this.startGame();
     },
     /**
      * Setup the background image.
@@ -66,17 +69,17 @@ Background.prototype = {
     },
     endGame: function () {
      var game = this.game;
-    clearTimeout(this.timer);
+    clearTimeout(game.timer);
     // Clear the stage.
     for (var i = 0; i < game.heads.length; i++) {
         if (game.heads[i]) {
             createjs.Tween.removeTweens(game.heads[i]);
-            this.stage.removeChild(game.heads[i]);
+            game.stage.removeChild(game.heads[i]);
         }
     }
     game.defaultValues();
     game.stage.removeChild(game.countingText);
     game.stage.removeChild(game.livesText);
     this.setupMenu();
-},
+}
 };
