@@ -120,7 +120,7 @@ Game.prototype = {
     throwHeads: function (isEnemy, onHit, headCollapse) {
         var img=this.getImagePath(isEnemy, 3);
         //var rand = Math.ceil(1000 + (Math.random() * 4) * 1000);
-        var rand = 2000;
+        var rand = 1000;
         this.timer = setTimeout(function () {
             var texture = new PIXI.Texture.fromImage(img);
 // create a texture from an image path
