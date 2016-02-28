@@ -1,11 +1,12 @@
-var Background = function (game) {
-    this.game=game;
-};
+    var Background = function (game) {
+        this.game = game;
+        this.rightMenu = new RightMenu();
+    };
 
 Background.prototype = {
 
     setupMenu: function () {
-        var game =this.game;
+        var game = this.game;
         // Create game name display.
         var name = new PIXI.Text('True Patriot', {
             font: 'bold 100px Arial',
@@ -42,13 +43,16 @@ Background.prototype = {
         button.interactive = true;
         button.buttonMode = true;
 
-        button.click = this.onHitStart.bind(game,button,name);
-        button.tap = this.onHitStart.bind(game,button,name);
+        button.click = this.onHitStart.bind(this, button, name);
+        button.tap = this.onHitStart.bind(this, button, name);
     },
-    onHitStart:function(button,name){
-        this.stage.removeChild(button);
-        this.stage.removeChild(name);
-        this.startGame();
+    onHitStart: function (button, name) {
+        var game = this.game;
+        game.stage.removeChild(button);
+        game.stage.removeChild(name);
+        this.rightMenu.setup();
+        this.rightMenu.addToStage(game.stage);
+        game.startGame();
     },
     /**
      * Setup the background image.
@@ -56,7 +60,7 @@ Background.prototype = {
     setupBg: function () {
         // return;
         // Create the texture.
-        var game =this.game;
+        var game = this.game;
         var bg = new PIXI.Sprite.fromImage('assets/bg.jpg');
 
         // Position the background in the center;
@@ -67,19 +71,22 @@ Background.prototype = {
         // Mount onto the stage.
         game.stage.addChild(bg);
     },
-    endGame: function () {
-     var game = this.game;
-    clearTimeout(game.timer);
-    // Clear the stage.
-    for (var i = 0; i < game.heads.length; i++) {
-        if (game.heads[i]) {
-            createjs.Tween.removeTweens(game.heads[i]);
-            game.stage.removeChild(game.heads[i]);
+    endRound: function () {
+        var game = this.game;
+        clearTimeout(game.timer);
+        // Clear the stage.
+        for (var i = 0; i < game.heads.length; i++) {
+            if (game.heads[i]) {
+                createjs.Tween.removeTweens(game.heads[i]);
+                game.stage.removeChild(game.heads[i]);
+            }
         }
+    },
+    endGame: function () {
+        this.endRound();
+        var game = this.game;
+        game.defaultValues();
+        this.rightMenu.removeFromStage(game.stage);
+        this.setupMenu();
     }
-    game.defaultValues();
-    game.stage.removeChild(game.countingText);
-    game.stage.removeChild(game.livesText);
-    this.setupMenu();
-}
 };

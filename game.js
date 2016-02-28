@@ -3,7 +3,6 @@ var Game = function () {
     // this._width = document.body.clientWidth;
     // this._height = document.body.clientHeight;
     this._width = 1920;
-    this._gameEnded=true;
     this._height = 1440;
     this._streakLimit = 2;
     this._center = {
@@ -30,11 +29,10 @@ Game.prototype = {
     defaultValues: function () {
         this.heads = [];
         this._streak = 0;
-        this.count = 0;
-        this.lives = 3;
     },
     build: function () {
         this.background = new Background(this);
+        this.levelModel= new Level(this,this.background,1, 3, 10);
         // Draw the background.
         this.background.setupBg();
         // Setup the start screen.
@@ -73,48 +71,13 @@ Game.prototype = {
     },
     startGame: function () {
         this.defaultValues();
+        this.levelModel.updateText();
         // Setup timer to throw random rocks.
-
         this.throwHeadsRandom();
-// create a text object that will be updated...
-        this.countingText = new PIXI.Text('SCORE: 0', {
-            font: 'bold 50px Arial',
-            fill: '#3e1707',
-            align: 'center',
-            stroke: '#a4410e',
-            strokeThickness: 7
-        });
-
-        this.countingText.position.x = 50;
-        this.countingText.position.y = 50;
-        this.countingText.anchor.x = 0.1;
-        this.stage.addChild(this.countingText)
-
-        // create a text object that will be updated...
-        this.livesText = new PIXI.Text('Lives: ' + this.lives, {
-            font: 'bold 50px Arial',
-            fill: '#3e1707',
-            align: 'center',
-            stroke: '#FF0000',
-            strokeThickness: 7
-        });
-
-        this.livesText.position.x = 50;
-        this.livesText.position.y = 100;
-        this.livesText.anchor.x = 0.1;
-        this.stage.addChild(this.livesText)
-
     },
     headCollapse: function (item) {
-        this.lives -= 1;
-        // update the text with a new string
-        this.livesText.text = "LIVES:" + this.lives;
-        this.livesText.updateText();
         this.stage.removeChild(item);
-        // End game if out of lives.
-        if (this.lives <= 0) {
-            this.background.endGame();
-        }
+        this.levelModel.removeLife();
     },
 
     throwHeads: function (isEnemy, onHit, headCollapse) {
@@ -258,22 +221,12 @@ Game.prototype = {
         this.stage.removeChild(item);
         // Add the rock to the stage.
         this.stage.addChild(piece);
-        this.count += 1;
-        // update the text with a new string
-        this.countingText.text = "SCORE:" + this.count;
-        this.countingText.updateText();
+        this.levelModel.increaseCount();
     },
     onHitWrong: function (item) {
         createjs.Tween.removeTweens(item);
-        this.stage.removeChild(item);
-        this.lives -= 1;
         this.animateMsg('WRONG TARGET!');
-        // update the text with a new string
-        this.livesText.text = "LIVES:" + this.lives;
-        this.livesText.updateText();
-        // End game if out of lives.
-        if (this.lives <= 0) {
-            this.background.endGame();
-        }
+        this.stage.removeChild(item);
+        this.levelModel.removeLife();
     }
 };
