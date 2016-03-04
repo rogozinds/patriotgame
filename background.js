@@ -8,7 +8,7 @@ Background.prototype = {
     setupMenu: function () {
         var game = this.game;
         // Create game name display.
-        var name = new PIXI.Text('True Patriot', {
+        var name = new PIXI.Text('Protect a Deer', {
             font: 'bold 100px Arial',
             fill: '#7da6de',
             stroke: 'black',
@@ -61,7 +61,7 @@ Background.prototype = {
         // return;
         // Create the texture.
         var game = this.game;
-        var bg = new PIXI.Sprite.fromImage('assets/bg.jpg');
+        var bg = new PIXI.Sprite.fromImage('assets/vaadin/background/1.jpg');
 
         // Position the background in the center;
         bg.anchor.x = 0.5;

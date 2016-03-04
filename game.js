@@ -54,7 +54,7 @@ Game.prototype = {
     getImagePath: function (isEnemy, nImages) {
         var rand = Math.floor((Math.random() * nImages) + 1);
         var folder = isEnemy ? 'enemies' : 'friends';
-        return 'assets/' + folder + '/' + rand + '.png';
+        return 'assets/vaadin/' + folder + '/' + rand + '.png';
     },
     /**
      * Start the gameplay.
@@ -136,7 +136,7 @@ Game.prototype = {
             this.stage.removeChild(streakPiece);
         }.bind(this.game, streakPiece));
 
-        this.game.animateMsg('RAMPAGE!!!');
+        this.game.animateMsg('AWESOME!!!');
         this.game.stage.addChild(streakPiece);
     },
     animateStreak: function () {
@@ -145,7 +145,7 @@ Game.prototype = {
         this.loader = new PIXI.loaders.Loader();
         this.loader.game=this;
         // use callback
-        this.loader.add('gund',"assets/gund1.png");
+        this.loader.add('gund',"assets/vaadin/joonas.png");
         this.loader.on('complete',this.onAssetsLoaded);
         //begin load
         this.loader.load(function(loader,resources){
