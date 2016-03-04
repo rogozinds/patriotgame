@@ -110,7 +110,7 @@ Game.prototype = {
             head.interactive = true;
             head.buttonMode = true;
             head.defaultCursor = "crosshair";
-            head.alpha = 0.5;
+            head.alpha = 1;
             head.click = onHit.bind(this, head);
             head.tap = onHit.bind(this, head);
             // Tween the rock with an easing function to simulate physics.
@@ -237,7 +237,6 @@ Game.prototype = {
         if (this._streak == this._streakLimit) {
             this.streak = 0;
         }
-        this.stage.addChild(piece);
         this.levelModel.increaseCount();
     },
     onHitWrong: function (item) {
