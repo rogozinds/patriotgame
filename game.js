@@ -152,7 +152,7 @@ Game.prototype = {
                 this.stage.removeChild(streakPiece);
             }.bind(this.game, streakPiece));
 
-        this.game.animateMsg('AWESOME!!!');
+        this.game.animateMsg('AWESOME!!!', this.game._width / 2, this.game.scale(200));
         this.game.stage.addChild(streakPiece);
     },
     animateStreak: function () {
@@ -169,7 +169,8 @@ Game.prototype = {
         });
 
     },
-    animateMsg: function (text) {
+    animateMsg: function (text, x, y) {
+        console.log("X Y:" + x + " " + y);
         rampage = new PIXI.Text(text, {
             font: 'bold '+this.scale(100)+'px Arial',
             fill: '#ff0000',
@@ -179,12 +180,12 @@ Game.prototype = {
         });
         rampage.anchor.x = 0.5;
         rampage.anchor.y = 0.5;
-        rampage.position.x = this._width / 2;
-        rampage.position.y = this.scale(150);
-        rampage.alpha = 0.2;
+        rampage.position.x = x;
+        rampage.position.y = y;
+        rampage.alpha = 0.0;
         createjs.Tween.get(rampage)
-            .to({alpha: 1}, 2000, createjs.Ease.quadOut)
-            .to({alpha: 0.5}, 1000, createjs.Ease.quadOut)
+            .to({alpha: 1}, 300, createjs.Ease.quadOut)
+            .to({alpha: 1}, 1000, createjs.Ease.quadOut)
             .call(function (rampage) {
                 this.stage.removeChild(rampage);
             }.bind(this, rampage));
@@ -240,7 +241,7 @@ Game.prototype = {
     },
     onHitWrong: function (item) {
         createjs.Tween.removeTweens(item);
-        this.animateMsg('WRONG TARGET!');
+        this.animateMsg('WRONG TARGET!',this._width / 2, this.scale(600));
         this.stage.removeChild(item);
         this.levelModel.removeLife();
     }
