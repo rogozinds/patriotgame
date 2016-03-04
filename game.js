@@ -191,7 +191,7 @@ Game.prototype = {
             }.bind(this, rampage));
         this.stage.addChild(rampage)
     },
-    onHit: function (item) {
+    headExplode: function(item) {
         //explode
         // Create several smaller rocks.
         // Setup the rock sprite.
@@ -228,21 +228,21 @@ Game.prototype = {
 
             }
         }
+        createjs.Tween.removeTweens(item);
+        this.stage.removeChild(item);
+    },
+    onHit: function (item) {
+        this.headExplode(item);
         this._streak += 1;
         if (this._streak == this._streakLimit) {
             this.streak = 0;
         }
-        //remove
-        createjs.Tween.removeTweens(item);
-        this.stage.removeChild(item);
-        // Add the rock to the stage.
         this.stage.addChild(piece);
         this.levelModel.increaseCount();
     },
     onHitWrong: function (item) {
-        createjs.Tween.removeTweens(item);
+        this.headExplode(item);
         this.animateMsg('WRONG TARGET!',this._width / 2, this.scale(600));
-        this.stage.removeChild(item);
         this.levelModel.removeLife();
     }
 };
