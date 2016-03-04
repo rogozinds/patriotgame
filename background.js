@@ -8,8 +8,9 @@ Background.prototype = {
     setupMenu: function () {
         var game = this.game;
         // Create game name display.
+        console.log("Scaled value:"+game.scale(100));
         var name = new PIXI.Text('Protect a Deer', {
-            font: 'bold 100px Arial',
+            font: 'bold '+game.scale(100)+'px Arial',
             fill: '#7da6de',
             stroke: 'black',
             strokeThickness: 8
@@ -17,21 +18,21 @@ Background.prototype = {
         name.anchor.x = 0.5;
         name.anchor.y = 0.5;
         name.position.x = game._center.x;
-        name.position.y = 100;
+        name.position.y = game.scale(100);
 
         // Create the button graphic.
         var button = new PIXI.Graphics();
-        button.lineStyle(10, 0x000000);
+        button.lineStyle(game.scale(10), 0x000000);
         button.beginFill(0xFFD800);
-        button.drawCircle(game._center.x, game._center.y, 150);
+        button.drawCircle(game._center.x, game._center.y, game.scale(150));
         button.endFill();
 
         // Create the play icon.
         var icon = new PIXI.Graphics();
         icon.beginFill(0x000000);
-        icon.moveTo(game._center.x + 100, game._center.y);
-        icon.lineTo(game._center.x - 60, game._center.y - 80);
-        icon.lineTo(game._center.x - 60, game._center.y + 80);
+        icon.moveTo(game._center.x + game.scale(100), game._center.y);
+        icon.lineTo(game._center.x - game.scale(60), game._center.y - game.scale(80));
+        icon.lineTo(game._center.x - game.scale(60), game._center.y + game.scale(80));
         icon.endFill();
 
         // Add the button to the stage.
@@ -50,7 +51,7 @@ Background.prototype = {
         var game = this.game;
         game.stage.removeChild(button);
         game.stage.removeChild(name);
-        this.rightMenu.setup();
+        this.rightMenu.setup(game);
         this.rightMenu.addToStage(game.stage);
         game.startGame();
     },

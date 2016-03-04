@@ -1,10 +1,16 @@
 var Game = function () {
     // Set the width and height of the scene.
-    // this._width = document.body.clientWidth;
-    // this._height = document.body.clientHeight;
-    this._width = 1920;
-    this._height = 1440;
-    this._streakLimit = 2;
+    this._width = document.body.clientWidth;
+    this._height = document.body.clientHeight;
+
+    this._scaleFactor = 1920 / this._width;
+    if (Math.ceil(this._height * this._scaleFactor) < 1200) {
+        this._scaleFactor = 1200 / this._height;
+    }
+    ;
+    this._width = this.scale(1920);
+    this._height = this.scale(1200);
+    this._streakLimit = 3;
     this._center = {
         x: Math.round(this._width / 2),
         y: Math.round(this._height / 2)
@@ -15,6 +21,7 @@ var Game = function () {
 
     // Create the main stage to draw on.
     this.stage = new PIXI.Stage();
+
     // Store rocks.
     this.heads = [];
     // Start running the game.
@@ -25,14 +32,16 @@ Game.prototype = {
     /**
      * Build the scene and begin animating.
      */
-
+    scale: function (size) {
+        return Math.round(size / this._scaleFactor);
+    },
     defaultValues: function () {
         this.heads = [];
-        this._streak = 0;
+        this._streak = 1;
     },
     build: function () {
         this.background = new Background(this);
-        this.levelModel= new Level(this,this.background,1, 3, 10);
+        this.levelModel = new Level(this, this.background, 1, 3, 10);
         // Draw the background.
         this.background.setupBg();
         // Setup the start screen.
@@ -59,11 +68,11 @@ Game.prototype = {
     /**
      * Start the gameplay.
      */
-    throwHeadsRandom: function() {
+    throwHeadsRandom: function () {
         var isEnemy = Math.random() >= 0.5;
-        if(isEnemy) {
+        if (isEnemy) {
             this.throwHeads(true, this.onHit, this.headCollapse);
-        }else {
+        } else {
             this.throwHeads(false, this.onHitWrong, this.nop)
         }
 
@@ -81,9 +90,9 @@ Game.prototype = {
     },
 
     throwHeads: function (isEnemy, onHit, headCollapse) {
-        var img=this.getImagePath(isEnemy, 3);
+        var img = this.getImagePath(isEnemy, 3);
         //var rand = Math.ceil(1000 + (Math.random() * 4) * 1000);
-        var rand = 1000;
+        var rand = 500;
         this.timer = setTimeout(function () {
             var texture = new PIXI.Texture.fromImage(img);
 // create a texture from an image path
@@ -91,9 +100,13 @@ Game.prototype = {
 // center the sprites anchor point
             head.anchor.x = 0.5;
             head.anchor.y = 0.5;
+            head.width=this.scale(head.width);
+            head.height=this.scale(head.height);
             // move the sprite t the center of the screen
-            head.position.x = Math.round(Math.random() * this._width);
-            head.position.y = 150;
+            head.position.x = this.scale(100)+Math.round(Math.random() * (this._width-this.scale(100)));
+            //head.position.x = this.scale(400);
+            head.position.y = this.scale(200);
+
             head.interactive = true;
             head.buttonMode = true;
             head.defaultCursor = "crosshair";
@@ -102,7 +115,9 @@ Game.prototype = {
             head.tap = onHit.bind(this, head);
             // Tween the rock with an easing function to simulate physics.
             this.heads.push(head);
-            var y1 = Math.round(50 + Math.random() * 500);
+            var y1 = Math.round(this._height * 0.2 + Math.random() * this._height/2);
+            var y1 = this.scale(700);
+
             head._tween1 = createjs.Tween.get(head)
                 .to({alpha: 1, y: y1}, 3000, createjs.Ease.cubicOut)
                 .call(headCollapse.bind(this, head));
@@ -116,13 +131,14 @@ Game.prototype = {
         this.renderer.render(this.stage);
         requestAnimationFrame(this.tick.bind(this));
     },
-    onAssetsLoaded: function() {
+    onAssetsLoaded: function () {
         var streakPiece = new PIXI.Sprite(this.resources.gund.texture);
         // this will log the correct width and height as the image was preloaded into the pixi.js cache
-        console.log(streakPiece.width + ', ' + streakPiece.height);
         streakPiece.texture.baseTexture.on('loaded', function () {
             console.log(streakPiece.width, streakPiece.height);
         });
+        streakPiece.width = this.game.scale(streakPiece.width);
+        streakPiece.height = this.game.scale(streakPiece.height);
         streakPiece.anchor.x = 0.0;
         streakPiece.anchor.y = 0.0;
         streakPiece.position.x = this.game._width - streakPiece.width / 2;
@@ -131,31 +147,31 @@ Game.prototype = {
         var x = this.game._width - streakPiece.width;
         var y = 0;
         createjs.Tween.get(streakPiece)
-            .to({x: x, y: y, alpha: 0.8}, 1500, createjs.Ease.quadOut)
-        .call(function (streakPiece) {
-            this.stage.removeChild(streakPiece);
-        }.bind(this.game, streakPiece));
+            .to({x: x, y: y, alpha: 0.8}, 3000, createjs.Ease.quadOut)
+            .call(function (streakPiece) {
+                this.stage.removeChild(streakPiece);
+            }.bind(this.game, streakPiece));
 
         this.game.animateMsg('AWESOME!!!');
         this.game.stage.addChild(streakPiece);
     },
     animateStreak: function () {
-        var sprites={};
+        var sprites = {};
         // create a new loader
         this.loader = new PIXI.loaders.Loader();
-        this.loader.game=this;
+        this.loader.game = this;
         // use callback
-        this.loader.add('gund',"assets/vaadin/joonas.png");
-        this.loader.on('complete',this.onAssetsLoaded);
+        this.loader.add('gund', "assets/vaadin/joonas.png");
+        this.loader.on('complete', this.onAssetsLoaded);
         //begin load
-        this.loader.load(function(loader,resources){
+        this.loader.load(function (loader, resources) {
             sprites.gund = new PIXI.Sprite(resources.gund.texture);
         });
 
     },
     animateMsg: function (text) {
         rampage = new PIXI.Text(text, {
-            font: 'bold 100px Arial',
+            font: 'bold '+this.scale(100)+'px Arial',
             fill: '#ff0000',
             align: 'center',
             stroke: 'black',
@@ -164,7 +180,7 @@ Game.prototype = {
         rampage.anchor.x = 0.5;
         rampage.anchor.y = 0.5;
         rampage.position.x = this._width / 2;
-        rampage.position.y = 150;
+        rampage.position.y = this.scale(150);
         rampage.alpha = 0.2;
         createjs.Tween.get(rampage)
             .to({alpha: 1}, 2000, createjs.Ease.quadOut)
@@ -187,20 +203,19 @@ Game.prototype = {
         for (var i = 0; i < 3; i++) {
             for (var j = 0; j < 2; j++) {
                 var piece = new PIXI.Sprite.fromImage("assets/blood1.png");
-                piece.width = Math.round(piece.texture.width * 0.43);
-                piece.height = Math.round(piece.texture.height * 0.43);
+                piece.width = this.scale(Math.round(piece.texture.width * 0.43));
+                piece.height = this.scale(Math.round(piece.texture.height * 0.43));
                 piece.anchor.x = 0.5;
                 piece.anchor.y = 0.5;
                 piece.position.x = item.position.x;
                 piece.position.y = item.position.y;
 
-                // Tween the rock.
                 var side = 1;
                 if (j != 0) {
                     side = -1;
                 }
-                var x = item.position.x + 30 * side;
-                var y = item.position.y - 30 * i;
+                var x = item.position.x +this.scale( 30 * side);
+                var y = item.position.y - this.scale(30 * i);
                 var t = 800 + Math.round(Math.random() * 100);
 
                 createjs.Tween.get(piece)

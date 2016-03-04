@@ -3,43 +3,42 @@ var RightMenu = function () {
 
 RightMenu.prototype = {
 
-    setup: function () {
-
+    setup: function (game) {
         this.scoreText = new PIXI.Text('', {
-            font: 'bold 50px Arial',
+            font: 'bold '+game.scale(50)+'px Arial',
             fill: '#3e1707',
             align: 'center',
             stroke: '#a4410e',
             strokeThickness: 7
         });
 
-        this.scoreText.position.x = 50;
-        this.scoreText.position.y = 50;
+        this.scoreText.position.x = game.scale(50);
+        this.scoreText.position.y = game.scale(50);
         this.scoreText.anchor.x = 0.1;
 
         // create a text object that will be updated...
         this.livesText = new PIXI.Text('', {
-            font: 'bold 50px Arial',
+            font: 'bold '+game.scale(50)+'px Arial',
             fill: '#3e1707',
             align: 'center',
             stroke: '#FF0000',
             strokeThickness: 7
         });
 
-        this.livesText.position.x = 50;
-        this.livesText.position.y = 100;
+        this.livesText.position.x = game.scale(50);
+        this.livesText.position.y = game.scale(100);
         this.livesText.anchor.x = 0.1;
 
         this.levelText = new PIXI.Text('', {
-            font: 'bold 50px Arial',
+            font: 'bold '+game.scale(50)+'px Arial',
             fill: '#3e1707',
             align: 'center',
             stroke: '#a4410e',
             strokeThickness: 7
         });
 
-        this.levelText.position.x = 50;
-        this.levelText.position.y = 150;
+        this.levelText.position.x = game.scale(50);
+        this.levelText.position.y = game.scale(150);
         this.levelText.anchor.x = 0.1;
     },
     addToStage: function (stage) {
